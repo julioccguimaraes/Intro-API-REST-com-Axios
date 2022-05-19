@@ -9,6 +9,11 @@
 </head>
 
 <body>
+    <h4>login</h4>
+    <input type="text" name="email" id="email" placeholder="email">
+    <input type="text" name="password" id="password" placeholder="senha">
+    <button onclick="login()">Entrar</button>
+
     <hr>
     <h4>Lista de games</h4>
     <ul id="games">
@@ -31,7 +36,26 @@
 </body>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
-    axios.get("http://localhost:3000/game").then((response) => {
+    function login() {
+        const email = document.getElementById("email").value
+        const password = document.getElementById("password").value
+
+        axios.post("http://localhost:3000/auth", { email, password }).then(response => {
+            localStorage.setItem("token", response.data.token)
+            axiosConfig.headers.Authorization = "Bearer " + localStorage.getItem("token")
+            alert("Logado!")
+        }).catch(error => {
+            alert(error)
+        })
+    }
+
+    const axiosConfig = {
+        headers: {
+            Authorization: "Bearer " + localStorage.getItem("token")
+        }
+    }
+
+    axios.get("http://localhost:3000/game", axiosConfig).then((response) => {
         const games = response.data.games
 
         const list = document.getElementById("games")
@@ -62,7 +86,7 @@
     }).catch(error => {
         console.log(error)
     })
-    
+
     function newGame() {
         const title = document.getElementById("title").value
         const year = document.getElementById("year").value
@@ -74,7 +98,7 @@
             price
         }
 
-        axios.post("http://localhost:3000/game", game).then(response => {
+        axios.post("http://localhost:3000/game", game, axiosConfig).then(response => {
             alert("Game cadastrado")
         }).catch(error => {
             console.log(error)
@@ -84,13 +108,13 @@
     function deleteGame(item) {
         const id = item.getAttribute("data-id")
 
-        axios.delete("http://localhost:3000/game/" + id).then(response => {
+        axios.delete("http://localhost:3000/game/" + id, axiosConfig).then(response => {
             alert("Game deletado")
         }).catch(error => {
             console.log(error)
         })
     }
-    
+
     function editGame(item) {
         document.getElementById("id-edit").value = item.getAttribute("data-id")
         document.getElementById("title-edit").value = item.getAttribute("data-title")
@@ -110,7 +134,7 @@
             price
         }
 
-        axios.put("http://localhost:3000/game/" + id, game).then(response => {
+        axios.put("http://localhost:3000/game/" + id, game, axiosConfig).then(response => {
             alert("Game atualizado")
         }).catch(error => {
             console.log(error)
